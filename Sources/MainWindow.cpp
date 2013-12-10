@@ -15,6 +15,10 @@ const QString DiagnosisTableName = "Diagnosis";
 const QString PhaseTableName = "Phase";
 const QString ParameterTableName = "Parameter";
 const QString RangeTableName = "PhaseParameterRange";
+const QString PhaseParameterTN = "PhaseParameter";
+
+PhaseParameterModel *MainWindow::mParameterModel = 0;
+Id MainWindow::mSelectedPhaseId = 0;
 //------------------------------------------------------------------------------
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), mUi(new Ui::MainWindow), mDiagnosisCreationDialog(0),
@@ -152,14 +156,20 @@ void MainWindow::createPhaseModel()
 //------------------------------------------------------------------------------
 void MainWindow::createParameterModel()
 {
-    mParameterModel = new QSqlTableModel;
-    mParameterModel->setTable(ParameterTableName);
-    mParameterModel->setEditStrategy(QSqlTableModel::OnManualSubmit);
-    mParameterModel->select();
-    mParameterModel->setHeaderData(0, Qt::Horizontal, tr("ID"));
+    mParameterModel = new PhaseParameterModel;
+    //%mParameterModel->setTable(ParameterTableName);
+    //%updatePhaseParameters();
+    mParameterModel->update(mSelectedPhaseId);
+
+    //% Данными заполняем каждый раз при изменении текущей стадии
+
+    //%mParameterModel->setEditStrategy(QSqlTableModel::OnManualSubmit);
+    //%mParameterModel->select();
+ /*%   mParameterModel->setHeaderData(0, Qt::Horizontal, tr("ID"));
     mParameterModel->setHeaderData(1, Qt::Horizontal, tr("Name"));
-    connect(mParameterModel, SIGNAL(dataChanged(QModelIndex,QModelIndex)),
-            SLOT(parameterChanged(QModelIndex,QModelIndex)));
+    mParameterModel->setHeaderData(2, Qt::Horizontal, tr("Weight"));%*/
+    /*connect(mParameterModel, SIGNAL(dataChanged(QModelIndex,QModelIndex)),
+            SLOT(parameterChanged(QModelIndex,QModelIndex)));*/
 }
 //------------------------------------------------------------------------------
 void MainWindow::createRangeModel()
@@ -198,6 +208,27 @@ void MainWindow::savePhaseChanges()
     //% Тут вызывать методы дальше по цепочке (для параметров) (а у параметров - для диапазонов)
 
     mWasPhasesChanged = false;
+}
+//------------------------------------------------------------------------------
+void MainWindow::updatePhaseParameters()
+{
+    mParameterModel->update(mSelectedPhaseId);
+
+//    SqlQuery parameterWeightQuery;
+    /*%parameterWeightQuery.prepare(QString("SELECT %1, %2 FROM %3 INNER JOIN %4 ON %3.%5 = %4.%6 WHERE %7 = :phaseId ORDER BY %2 DESC")
+                                 .arg("Name", "Weight", PhaseParameterTN, ParameterTableName
+                                      , "ParameterID", "ID", "PhaseID"));%*/
+    /*%qDebug() << QString("SELECT %4.%1, %2, %3 FROM %4 INNER JOIN %5 ON %4.%6 = %5.%7 WHERE %8 = :phaseId ORDER BY %3 DESC")
+                                     .arg("ID", "Name", "Weight", PhaseParameterTN
+                                          , ParameterTableName, "ParameterID", "ID"
+                                          , "PhaseID");%*/
+/*%    parameterWeightQuery.prepare(QString("SELECT %5.%1, %2, %3 FROM %4 INNER JOIN %5 ON %4.%6 = %5.%7 WHERE %8 = :phaseId ORDER BY %3 DESC")
+                                 .arg("ID", "Name", "Weight", PhaseParameterTN
+                                      , ParameterTableName, "ParameterID", "ID"
+                                      , "PhaseID"));
+    parameterWeightQuery.addBindValue(mSelectedPhaseId);
+    parameterWeightQuery.exec();
+    mParameterModel->setQuery(parameterWeightQuery);%*/
 }
 //------------------------------------------------------------------------------
 void MainWindow::on_createDiagnosisPushButton_clicked()
@@ -350,21 +381,41 @@ void MainWindow::phaseCreationDialogFinished(int)
 //------------------------------------------------------------------------------
 void MainWindow::currentPhaseChanged(QModelIndex current, QModelIndex previous)
 {
+    mSelectedPhaseId = 0;
+
     // Если выделена хотя бы одна фаза:
     if (current.isValid()) {
         mHasSelectedPhase = true;
         // Получаем идентификатор текущей выделенной фазы:
         mSelectedPhaseId = mPhaseModel->index(current.row(), 0).data().toULongLong();
         // Отображаем только те параметры, которые принадлежат выделенной фазе:
-        mParameterModel->setFilter("ID IN (SELECT ParameterID FROM PhaseParameter WHERE PhaseID="
-                                   + QString::number(mSelectedPhaseId) + ")");
+        /*%mParameterModel->setFilter("ID IN (SELECT ParameterID FROM PhaseParameter WHERE PhaseID="
+                                   + QString::number(mSelectedPhaseId) + ")");*/
 //        mWasParametersChanged = false;
+
+
+    //%    updatePhaseParameters();
+
+        /*%SqlQuery parameterWeightQuery;
+        parameterWeightQuery.prepare(QString("SELECT %1, %2 FROM %3 INNER JOIN %4 ON %3.%5 = %4.%6 WHERE %7 = :phaseId ORDER BY %2 DESC")
+                                     .arg("Name", "Weight", PhaseParameterTN, ParameterTableName
+                                          , "ParameterID", "ID", "PhaseID"));
+        parameterWeightQuery.addBindValue(mSelectedPhaseId);
+        parameterWeightQuery.exec();
+        mParameterModel->setQuery(parameterWeightQuery);%*/
+
     } else {
         mHasSelectedPhase = false;
         // Не отображаем ни одного параметра:
-        mParameterModel->setFilter("0=1");
+//        mParameterModel->clear(); //%
+  //%      mSelectedPhaseId = 0;
+   //%     updatePhaseParameters();//%
+        //%mParameterModel->setFilter("0=1");
 //        mPhaseModel->clear(); //%Ведь нет выделенного диагноза
     }
+
+    mParameterModel->update(mSelectedPhaseId);
+    //%mUi->parameterTableView->hideColumn(0);
 
     // Чтобы обновить модель диапазонов:
     if (mParameterModel->rowCount() > 0) {
@@ -385,12 +436,16 @@ void MainWindow::currentParameterChanged(QModelIndex current, QModelIndex previo
     if (current.isValid()) {
         mHasSelectedParameter = true;
         // Получаем идентификатор текущего выделенного параметра:
-        mSelectedParameterId = mParameterModel->index(current.row(), 0).data().toULongLong();
+        //%mSelectedParameterId = mParameterModel->index(current.row(), 0).data().toULongLong();
         // Отображаем только те диапазоны, которые принадлежат выделенному параметру:
         // Получим PhaseParameterID:
-        Id phaseParameterId
-                = DB::getPhaseParameterId(mSelectedPhaseId, mSelectedParameterId);
-        mRangeModel->setFilter("PhaseParameterID=" + QString::number(phaseParameterId));
+        /*%Id phaseParameterId
+                = DB::getPhaseParameterId(mSelectedPhaseId, mSelectedParameterId);%*/
+        Id phaseParameterID = mParameterModel->index(current.row(), 0).data().toULongLong();
+        mSelectedParameterId = DB::getParameterID(phaseParameterID);
+        /*%qDebug() << "Phase:" << mSelectedPhaseId << "Par:" << mSelectedParameterId
+                 << "phasePar:" << phaseParameterId;%*/
+        mRangeModel->setFilter("PhaseParameterID=" + QString::number(phaseParameterID));
 //        mWasParametersChanged = false;
     } else {
         mHasSelectedParameter = false;
@@ -400,15 +455,15 @@ void MainWindow::currentParameterChanged(QModelIndex current, QModelIndex previo
     }
 }
 //------------------------------------------------------------------------------
-void MainWindow::parameterChanged(QModelIndex, QModelIndex)
+/*%void MainWindow::parameterChanged(QModelIndex, QModelIndex)
 {
     mParameterModel->submitAll();
-}
+}%*/
 //------------------------------------------------------------------------------
 void MainWindow::on_addParameterPushButton_clicked()
 {
     if (mParameterAddingDialog == 0) {
-        mParameterAddingDialog = new ParameterAddingDialog(mParameterModel, this);
+        mParameterAddingDialog = new ParameterAddingDialog(this);
         connect(mParameterAddingDialog, SIGNAL(finished(int)),
                 SLOT(parameterAddingDialogFinished(int)));
         mParameterAddingDialog->show();
@@ -427,11 +482,13 @@ void MainWindow::on_removeParameterPushButton_clicked()
         if (clickedButton == QMessageBox::Ok) {
             foreach (QModelIndex selectedParameterIndex,
                      mUi->parameterTableView->selectionModel()->selectedRows()) {
-                Id parameterId = mParameterModel->index(selectedParameterIndex.row(), 0)
+                Id phaseParameterId = mParameterModel->index(selectedParameterIndex.row(), 0)
                         .data().toULongLong();
-                DB::deletePhaseParameter(mSelectedPhaseId, parameterId);
+                DB::deletePhaseParameter(phaseParameterId);
             }
-            mParameterModel->select();
+            mParameterModel->update();
+            //%updatePhaseParameters();
+            //%mParameterModel->select();
         }
     } else {
         QMessageBox::information(this, tr("Remove Parameters"),

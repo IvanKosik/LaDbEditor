@@ -51,6 +51,7 @@ public:
     static QSet<QPair<QDateTime, Id> > getPatientPrognoses(Id patientId);
     static QString getVerificationConclusion(Id expertiseId);
     static Id getPhaseParameterId(Id phaseId, Id parameterId);
+    static Id getParameterID(Id phaseParameterID);
 
 //%    static bool addDiagnosis(const QString &name);
     static bool addParameterResearches(Id parameterId,
@@ -60,6 +61,7 @@ public:
 
     static bool addPhaseParameter(Id phaseId, Id parameterId);
     static bool deletePhaseParameter(Id phaseId, Id parameterId);
+    static bool deletePhaseParameter(Id phaseParameterId);
 
     static bool addPhaseParameterRange(Id phaseId, Id parameterId,
                                        double rangeBegin, double rangeEnd,

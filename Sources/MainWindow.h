@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include "DB.h"
+#include "PhaseParameterModel.h"
 #include "Dialogs/DiagnosisCreationDialog.h"
 #include "Dialogs/PhaseCreationDialog.h"
 #include "Dialogs/ParameterAddingDialog.h"
@@ -38,6 +39,8 @@ public:
     
     void savePhaseChanges();
 
+    static void updatePhaseParameters();
+
 private:
     void createModels();
     void createDiagnosisModel();
@@ -50,7 +53,8 @@ private:
 
     QSqlTableModel *mPhaseModel;
     QSqlTableModel *mDiagnosisModel;
-    QSqlTableModel *mParameterModel;
+    //%QSqlTableModel *mParameterModel;
+    static PhaseParameterModel *mParameterModel;
     QSqlTableModel *mRangeModel;
 
     QSortFilterProxyModel *mDiagnosisProxyModel; //% Если используется только в одном месте (конструкторе), то убрать ее из полей класса.
@@ -63,7 +67,7 @@ private:
     bool mHasSelectedParameter;
 
     Id mSelectedDiagnosisId;
-    Id mSelectedPhaseId;
+    static Id mSelectedPhaseId;
     Id mSelectedParameterId;
 
     bool mWasPhasesChanged;
@@ -90,7 +94,7 @@ private slots:
     void on_removeParameterPushButton_clicked();
     void parameterAddingDialogFinished(int);
     void currentParameterChanged(QModelIndex current, QModelIndex previous);
-    void parameterChanged(QModelIndex, QModelIndex);
+    //%void parameterChanged(QModelIndex, QModelIndex);
 
     void on_createRangePushButton_clicked();
     void on_deleteRangePushButton_clicked();

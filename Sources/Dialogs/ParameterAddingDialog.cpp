@@ -8,11 +8,10 @@
 const QString ParameterTableName = "Parameter";
 const QString ResearchTableName = "Research";
 //------------------------------------------------------------------------------
-ParameterAddingDialog::ParameterAddingDialog(QSqlTableModel *phaseParameterModel,
-                                             QWidget *parent)
-    : QDialog(parent), mUi(new Ui::ParameterAddingDialog),
-      mPhaseParameterModel(phaseParameterModel), mHasSelectedParameter(false),
-      mParameterCreationDialog(0), mResearchAddingDialog(0)
+ParameterAddingDialog::ParameterAddingDialog(QWidget *parent)
+    : QDialog(parent), mUi(new Ui::ParameterAddingDialog)
+    , mHasSelectedParameter(false), mParameterCreationDialog(0)
+    , mResearchAddingDialog(0)
 {
     mUi->setupUi(this);
 
@@ -78,7 +77,8 @@ bool ParameterAddingDialog::addSelectedParameters()
                 DB::addPhaseParameter(selectedPhaseId, parameterId);
             }
             // Обновляем таблицу параметров фазы:
-            mPhaseParameterModel->select();
+            MainWindow::updatePhaseParameters();
+            //%mPhaseParameterModel->select();
         } else {
             QMessageBox::information(this, tr("Add Parameters"),
                                      tr("Select at least one parameter record."));
@@ -115,8 +115,9 @@ void ParameterAddingDialog::currentParameterChanged(QModelIndex current, QModelI
 void ParameterAddingDialog::parameterChanged(QModelIndex, QModelIndex)
 {
     mParameterModel->submitAll();
-    // Обновляем таблицу:
-    mPhaseParameterModel->select();
+    // Обновляем таблицу параметров фазы:
+    //%mPhaseParameterModel->select();
+    MainWindow::updatePhaseParameters();
 }
 //------------------------------------------------------------------------------
 void ParameterAddingDialog::on_createParameterPushButton_clicked()

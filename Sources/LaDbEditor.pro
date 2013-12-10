@@ -23,7 +23,8 @@ SOURCES += main.cpp\
     Dialogs/ResearchAddingDialog.cpp \
     Dialogs/ResearchCreationDialog.cpp \
     Dialogs/RangeCreationDialog.cpp \
-    Dialogs/DbConnectionDialog.cpp
+    Dialogs/DbConnectionDialog.cpp \
+    PhaseParameterModel.cpp
 
 HEADERS  += MainWindow.h \
     SqlQuery.h \
@@ -37,7 +38,8 @@ HEADERS  += MainWindow.h \
     Dialogs/ResearchAddingDialog.h \
     Dialogs/ResearchCreationDialog.h \
     Dialogs/RangeCreationDialog.h \
-    Dialogs/DbConnectionDialog.h
+    Dialogs/DbConnectionDialog.h \
+    PhaseParameterModel.h
 
 FORMS    += MainWindow.ui \
     Dialogs/DiagnosisCreationDialog.ui \

@@ -19,8 +19,7 @@ class ParameterAddingDialog : public QDialog
     Q_OBJECT
     
 public:
-    explicit ParameterAddingDialog(QSqlTableModel *phaseParameterModel,
-                                   QWidget *parent = 0);
+    explicit ParameterAddingDialog(QWidget *parent = 0);
     ~ParameterAddingDialog();
 
     bool hasSelectedParameter() const;

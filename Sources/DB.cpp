@@ -346,6 +346,16 @@ Id DB::getPhaseParameterId(Id phaseId, Id parameterId)
     return query.value(0).toULongLong();
 }
 //------------------------------------------------------------------------------
+Id DB::getParameterID(Id phaseParameterID)
+{
+    SqlQuery query;
+    query.prepare("SELECT ParameterID FROM PhaseParameter WHERE ID = :id");
+    query.bindValue(":id", phaseParameterID);
+    query.exec();
+    query.first();
+    return query.value(0).toULongLong();
+}
+//------------------------------------------------------------------------------
 bool DB::addParameterResearches(Id parameterId, IdSet researchIds)
 {
     foreach (Id researchId, researchIds) {
@@ -382,7 +392,7 @@ bool DB::deleteParameterResearch(Id parameterId, Id researchId)
 bool DB::addPhaseParameter(Id phaseId, Id parameterId)
 {
     SqlQuery query;
-    query.prepare("INSERT INTO PhaseParameter (ID, PhaseID, ParameterID) VALUES (NULL, ?, ?)");
+    query.prepare("INSERT INTO PhaseParameter (ID, PhaseID, ParameterID, Weight) VALUES (NULL, ?, ?, 1)");
     query.addBindValue(phaseId);
     query.addBindValue(parameterId);
     if (query.exec()) {
@@ -403,6 +413,14 @@ bool DB::deletePhaseParameter(Id phaseId, Id parameterId)
     } else {
         return false;
     }
+}
+//------------------------------------------------------------------------------
+bool DB::deletePhaseParameter(Id phaseParameterId)
+{
+    SqlQuery query;
+    query.prepare("DELETE FROM PhaseParameter WHERE ID = :id");
+    query.bindValue(":id", phaseParameterId);
+    return query.exec();
 }
 //------------------------------------------------------------------------------
 bool DB::addPhaseParameterRange(Id phaseId, Id parameterId,
