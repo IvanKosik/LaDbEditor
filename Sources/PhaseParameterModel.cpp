@@ -25,6 +25,11 @@ bool PhaseParameterModel::setData(const QModelIndex &index
         return false;
     }
 
+    // Нельзя указывать в качестве весового коэффициента 0:
+    if (value.toDouble() == 0) {
+        return false;
+    }
+
     QModelIndex phaseParameterIdIndex = QSqlQueryModel::index(index.row(), 0);
     Id phaseParameterId = data(phaseParameterIdIndex).toULongLong();
 
